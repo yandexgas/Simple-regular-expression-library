@@ -21,9 +21,6 @@
     <ClCompile Include="SintaxTree.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Nodes.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="NondeterminedFinalAutomata.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
