@@ -86,11 +86,16 @@ int main()
 	catch (regex::SintaxTree_Exception e) {
 		std::cout << e;
 	}
+	bool rs = false;
 	for (int i = 0; i < 1111111; i++) {
+		rgx::Regular_expression st("&?");
+		rs = rgx::checkString("?", st);
+		rs = rgx::checkString("(<name>faf", "&(<name>faf)");
+		rgx::Regular_expression stt("&(<name>faf)");
 		rgx::Regular_expression r("mephi&&|@&.?ru+");
 		rgx::Regular_expression r3("(<a>(ac)|(bd))1?");
 		//Тут дополнение языка
-		bool rs = false;
+		
 		rgx::Regular_expression r1(r.make_language_addition());
 		rs = rgx::checkString("mephi&ru", r1);
 		rs = rgx::checkString("mephru", r1);
