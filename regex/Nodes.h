@@ -59,29 +59,29 @@ namespace regex {
 
 	class Node
 	{
-	protected:
+	protected: 
 		std::weak_ptr<Node> parent_;
 		std::unordered_set<std::string>* alphabet;
 		std::unique_ptr<NondeterminedFinalAutomata> automatOfNode;
 	public:
 		Node() : parent_(),automatOfNode(nullptr),alphabet(nullptr) {}
 		virtual ~Node() {}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) = 0;
-		virtual NodeTypes getType()=0;
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const = 0;
+		virtual NodeTypes getType() const=0;
 		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator, bool inverse =false) = 0;
-		virtual bool complited() noexcept = 0;
-		virtual std::int8_t getPriority()noexcept = 0;
-		virtual std::string getSimbol() noexcept = 0;
+		virtual bool complited() const noexcept = 0;
+		virtual std::int8_t getPriority()const noexcept = 0;
+		virtual std::string getSimbol() const noexcept = 0;
 		virtual void buildNfa() = 0;
 		inline void setParent(std::shared_ptr<Node> iter) noexcept {
 			parent_ = iter;
 		}
-		virtual std::shared_ptr<Node>  getLeft()noexcept { return nullptr; }
-		virtual std::shared_ptr<Node> getRight()noexcept { return nullptr; }
+		virtual std::shared_ptr<Node>  getLeft()const noexcept { return nullptr; }
+		virtual std::shared_ptr<Node> getRight()const noexcept { return nullptr; }
 		std::unique_ptr<NondeterminedFinalAutomata> stealNodesNfa() {
 			return std::move(automatOfNode);
 		}
-		std::weak_ptr<Node> getParent()noexcept { return parent_; }
+		std::weak_ptr<Node> getParent() const noexcept { return parent_; }
 		auto operator <=>(Node* b) {
 			return getPriority() <=> (*b).getPriority();
 		}
@@ -101,27 +101,27 @@ namespace regex {
 	public:
 		Leaf( const std::string sgn = "") :Node(), sign_(sgn) {}
 		virtual ~Leaf()override {}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			std::string s;
 			s += *iter;
 			return std::make_unique<Leaf>(s);
 		}
-		virtual NodeTypes getType()noexcept override {
+		virtual NodeTypes getType() const noexcept override {
 			return NodeTypes::LEAF;
 		}
 		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
 			return true;
 		}
-		virtual bool complited()noexcept override {
+		virtual bool complited() const noexcept override {
 			return true;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return Leaf::priority;
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const  noexcept override {
 			return sign_;
 		}
-		virtual void buildNfa()override {
+		virtual void buildNfa() override {
 			std::shared_ptr<AutomataState> start = std::make_shared<AutomataState>();
 			std::shared_ptr<AutomataState> end = std::make_shared<AutomataState>(true);
 			start->addTransition(end, getSimbol());
@@ -142,8 +142,8 @@ namespace regex {
 			right_ = nullptr;
 		};
 		virtual ~MetaNode()override {};
-		virtual std::shared_ptr<Node> getLeft()noexcept override { return left_; }
-		virtual std::shared_ptr<Node> getRight()noexcept override { return right_; }
+		virtual std::shared_ptr<Node> getLeft() const noexcept override { return left_; }
+		virtual std::shared_ptr<Node> getRight() const noexcept override { return right_; }
 	};
 
 	class SoloMetaNode :public MetaNode
@@ -153,7 +153,7 @@ namespace regex {
 		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator, bool inverse = false) override {
 			return true;
 		}
-		virtual bool complited()noexcept override {
+		virtual bool complited()const noexcept override {
 			return true;
 		}
 	};
@@ -184,9 +184,7 @@ namespace regex {
 					left_->setParent(*++iter);
 				}
 				else
-				{
 					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
-				}
 					break; 
 			}
 			case 1:
@@ -195,14 +193,12 @@ namespace regex {
 					right_->setParent(*--iter);
 				}
 				else
-				{
 					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
-				}
 				break;
 			}
 			return true;
 		}
-		virtual bool complited()noexcept override {
+		virtual bool complited() const noexcept override {
 			return side_ == 0 ? left_ != nullptr : right_ != nullptr;
 		}
 	};
@@ -211,7 +207,7 @@ namespace regex {
 	{
 	public:
 		BinaryMetaNode() :MetaNode() {};
-		virtual bool complited()noexcept override {
+		virtual bool complited() const noexcept override {
 			return left_!=nullptr&&right_!=nullptr;
 		}
 		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
@@ -228,9 +224,7 @@ namespace regex {
 					left_->setParent(*iter);			
 				}
 				else
-				{
-					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
-				}		
+					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");		
 				return true;
 		}		
 	};
@@ -243,19 +237,19 @@ namespace regex {
 		static std::string sign;
 	public:
 		ScriningNode() :UnaryMetaNode(1) {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const override {
 			return NodeTypes::SCREENING;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			return CrtNode<ScriningNode>(iter, sign);
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return ScriningNode::sign;
 		}
-		static std::string getSign() noexcept {
+		static std::string getSign()  noexcept {
 			return ScriningNode::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return ScriningNode::priority;
 		}
 		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
@@ -295,11 +289,11 @@ namespace regex {
 			std::string::const_iterator end;
 			std::string nameofgroup_;
 			bool ofset;
-			void doAsExit(std::string::const_iterator& currentChar) {
+			void doAsExit(std::string::const_iterator& currentChar) noexcept {
 				if (currentChar > begin)
 					begin = currentChar;
 			};
-			void doAsEnter(std::string::const_iterator& currentChar) {
+			void doAsEnter(std::string::const_iterator& currentChar)  {
 				if (begin._Ptr != nullptr) {
 					if (currentChar >= end)
 						end = currentChar;
@@ -335,14 +329,14 @@ namespace regex {
 		};
 		virtual ~NamedGroup() override {
 		}
-		virtual NodeTypes getType() override {
+		virtual NodeTypes getType() const override {
 			return NodeTypes::NAMED_GROUP;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return NamedGroup::priority;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
-			nameOfGroup_ = "";
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const  override {
+			std::string nameOfGroup_ = "";
 			std::string tmp;
 			bool correct = false;
 			int count =0;
@@ -361,14 +355,8 @@ namespace regex {
 						count = 0;
 						while (iter != eos_ && !correct)
 						{
-							if (*iter == ')'
-								&& count > 0
-								&& *(iter - 1) != ScriningNode::getSign()[0])
-							{
-
+							if (*iter == ')' && count > 0 && *(iter - 1) != ScriningNode::getSign()[0])
 								correct = true;
-
-							}
 							else if (*iter == ')')
 								return nullptr;
 							else
@@ -390,7 +378,7 @@ namespace regex {
 			iter -= count;
 			return correct ? std::make_unique<NamedGroup>(nameOfGroup_) : nullptr;
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return NamedGroup::sign + nameOfGroup_ + ">";
 		}
 		/*virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
@@ -406,7 +394,7 @@ namespace regex {
 			return true;
 
 		}*/
-		virtual void buildNfa()override {
+		virtual void buildNfa() override {
 			automatOfNode = right_->stealNodesNfa();
 			bool ofset = false;
 		if (parent_.lock() != nullptr) {
@@ -439,16 +427,16 @@ namespace regex {
 		static const std::int8_t priority = 1;
 	public:
 		ConcatNode() :BinaryMetaNode() {};
-		virtual NodeTypes getType() override {
+		virtual NodeTypes getType() const override {
 			return NodeTypes::CONCAT;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return ConcatNode::priority;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter)const  override {
 			return nullptr;
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return "concat";
 		}
 		virtual void buildNfa()override {
@@ -479,16 +467,16 @@ namespace regex {
 		static std::string sign;
 	public:
 		OrNode() :BinaryMetaNode() {}
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const override {
 			return NodeTypes::OR;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			return CrtNode<OrNode>(iter, sign);
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return OrNode::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return OrNode::priority;
 		}
 
@@ -518,16 +506,16 @@ namespace regex {
 		static std::string sign;
 	public:
 		PositiveClosureNode() :UnaryMetaNode(0) {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const	override {
 			return NodeTypes::POSITIVE_ÑLOSURE;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter)const  override {
 			return CrtNode<PositiveClosureNode>(iter, sign);
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return PositiveClosureNode::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return PositiveClosureNode::priority;
 		}
 		virtual void buildNfa()override {
@@ -550,16 +538,16 @@ namespace regex {
 		static std::string sign;
 	public:
 		OptionNode() :UnaryMetaNode(0) {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const	override {
 			return NodeTypes::OPTION;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			return CrtNode<OptionNode>(iter, sign);
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const  noexcept override {
 			return OptionNode::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return OptionNode::priority;
 		}
 		virtual void buildNfa()override {
@@ -589,16 +577,16 @@ namespace regex {
 		static std::string sign;
 	public:
 		AnyNode() :SoloMetaNode() {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType()	const override {
 			return NodeTypes::ANY;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			return CrtNode<AnyNode>(iter, sign);
 		}
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return AnyNode::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return AnyNode::priority;
 		}
 		virtual void buildNfa()override {
@@ -618,11 +606,11 @@ namespace regex {
 		std::pair<std::optional<std::int32_t>, std::optional<std::int32_t>> diapason_;
 	public:
 		RepeatNode(const std::string::const_iterator end = {}, std::pair<std::optional<std::int32_t>, std::optional<std::int32_t>> diapason = { 1,1 }) :UnaryMetaNode(0), eos_(end), diapason_(diapason) {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const	override {
 			return NodeTypes::REPEAT;
 		}
 		virtual ~RepeatNode() override {}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter)  const override {
 			int count = 0;
 			std::string first, second;
 			if (*iter == '{') {
@@ -652,9 +640,8 @@ namespace regex {
 						else
 							dia.second = std::stoi(second);
 
-						if (dia.first && dia.second && dia.first > dia.second) {
+						if (dia.first && dia.second && dia.first > dia.second) 
 							throw SintaxTree_Exception("left value of repeat diapason greater than right value.");
-						}
 
 						auto f = eos_;
 						f = {};
@@ -666,7 +653,7 @@ namespace regex {
 			iter -= count;
 			return nullptr;
 		}
-		virtual std::string getSimbol() noexcept override{
+		virtual std::string getSimbol() const noexcept override{
 			std::stringstream s{};
 			s << RepeatNode::sign;
 			if(diapason_.first)
@@ -679,7 +666,7 @@ namespace regex {
 			s >> res;
 			return res;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return RepeatNode ::priority;
 		}
 		virtual void buildNfa()override {
@@ -813,28 +800,22 @@ namespace regex {
 				if ((*groups).contains(nameofgroup_)) {
 					std::string str = (*groups)[nameofgroup_];
 					auto tmp = state->makeTransition(link);
-					if (tmp) {
+					if (tmp) 
 						state->changeCondition(link, str);
-					}
 				}
 				else
-				{
 					throw std::logic_error("attempt to access an uninitialized capture group");
-				}
-			}
-			virtual int order() {
-				return 0;
 			}
 		};
 
 	public:
 		LinkNamedGroup(std::string name = "",const std::string::const_iterator end = {}) :SoloMetaNode(), eos_(end), nameOfGroup_(name) {};
 		virtual ~LinkNamedGroup() override {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType()	const override {
 			return NodeTypes::LINK_NAMED_GROUP;
 		}
-		 std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
-			nameOfGroup_ = "";
+		 std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
+			std::string nameOfGroup_ = "";
 			int count = 0;
 			if (*iter == '<') {
 				++iter;
@@ -853,13 +834,13 @@ namespace regex {
 			iter -= count;
 			return nullptr;
 		}
-		 virtual std::string getSimbol() noexcept override {
+		 virtual std::string getSimbol() const noexcept override {
 			 return LinkNamedGroup::sign + nameOfGroup_ + ">";
 		 }
-		 virtual std::int8_t getPriority()noexcept override {
+		 virtual std::int8_t getPriority() const noexcept override {
 			 return LinkNamedGroup::priority;
 		 }
-		 virtual bool complited()noexcept override {
+		 virtual bool complited() const noexcept override {
 			 return groups->contains(nameOfGroup_);
 		 }
 		 virtual void buildNfa()override {
@@ -885,21 +866,21 @@ namespace regex {
 		static std::string sign;
 	public:
 		OpenPriority(bool=0) :SoloMetaNode(/*sign_,*/) {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType() const	override {
 			return NodeTypes::OPEN_PRIORITY;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) const override {
 			return CrtNode<OpenPriority>(iter, sign);
 		}
 
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const  noexcept override {
 			return OpenPriority::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return OpenPriority::priority;
 		}
 		virtual void buildNfa()override {}
-		virtual bool complited()noexcept override {
+		virtual bool complited() const noexcept override {
 			return false;
 		}
 	};
@@ -910,21 +891,21 @@ namespace regex {
 		static std::string sign;
 	public:
 		ClosePriority() :SoloMetaNode() {};
-		virtual NodeTypes getType()	override {
+		virtual NodeTypes getType()	const override {
 			return NodeTypes::CLOSE_PRIORITY;
 		}
-		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter) override {
+		virtual std::unique_ptr<Node> createNode(std::string::const_iterator& iter)const  override {
 			return CrtNode<ClosePriority>(iter, sign);
 		}
 
-		virtual std::string getSimbol() noexcept override {
+		virtual std::string getSimbol() const noexcept override {
 			return ClosePriority::sign;
 		}
-		virtual std::int8_t getPriority()noexcept override {
+		virtual std::int8_t getPriority() const noexcept override {
 			return ClosePriority::priority;
 		}
 		virtual void buildNfa()override {}
-		virtual bool complited()noexcept override {
+		virtual bool complited()const noexcept override {
 			return false;
 		}
 	};

@@ -75,7 +75,7 @@ namespace regex {
 				else return nullptr;
 			}
 		}
-		virtual std::shared_ptr <AutomataState> makeTransition(std::string str, bool exp=false)override {
+		virtual std::shared_ptr <AutomataState> makeTransition(std::string str, bool exp=false) override {
 			if (transitions_.contains(str))
 				return transitions_[str].lock();
 			else if(!exp)
@@ -148,21 +148,21 @@ namespace regex {
 			}
 			return result;
 		}
-		std::shared_ptr<AutomataState>  mergeStates(std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>) noexcept;
+		std::shared_ptr<AutomataState>  mergeStates(std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>) const noexcept;
 		void minimization(const std::unordered_set<std::string>&);
-		std::string k_path(std::optional<std::string >*** memoryMatrix, std::unordered_set<std::string>&,std::shared_ptr<AutomataState> i, std::shared_ptr<AutomataState> j, unsigned short k);
+		std::string k_path(std::optional<std::string >*** memoryMatrix, std::unordered_set<std::string>&,std::shared_ptr<AutomataState> i, std::shared_ptr<AutomataState> j, unsigned short k) const;
 	public:
 		DeterminedFinalAutomat(std::unique_ptr<NondeterminedFinalAutomata>,const std::unordered_set<std::string>&, bool minim=true);
 		DeterminedFinalAutomat(DeterminedFinalAutomat& obj) :states_count_(obj.states_count_), start_(obj.start_),acceptStates_(obj.acceptStates_), allStates(obj.allStates) {}
 		DeterminedFinalAutomat() :states_count_(0), start_(nullptr) {}
-		bool checkString(std::string);
+		bool checkString(std::string) const;
 		static bool statesEquals(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>, std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>);
-		std::string regexRecover();
-		std::vector<std::string> findAll(std::string, std::vector<std::unordered_map<std::string, std::string>>* groups= nullptr);
+		std::string regexRecover() const;
+		std::vector<std::string> findAll(std::string, std::vector<std::unordered_map<std::string, std::string>>* groups= nullptr) const;
 
 		DeterminedFinalAutomat& operator=(DeterminedFinalAutomat&& obj) noexcept;
 		DeterminedFinalAutomat& operator=(DeterminedFinalAutomat& obj) noexcept;
-		DeterminedFinalAutomat operator*(const DeterminedFinalAutomat& obj) noexcept;
+		DeterminedFinalAutomat operator*(const DeterminedFinalAutomat& obj) const noexcept;
 
 
 	};

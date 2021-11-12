@@ -37,13 +37,13 @@ namespace regex {
 		void clear() {
 			root_ = nullptr;
 		}
-		void print() {
+		void print() const {
 			int deep = 0;
 			std::shared_ptr<Node> ptr = root_;
 			pass(0, ptr);
 			
 		}
-		void pass(int deep,std::shared_ptr<Node> w) {
+		void pass(int deep,std::shared_ptr<Node> w) const {
 			if (w->getLeft() != nullptr)
 				pass(deep + 1, w->getLeft());
 			for (int i = 0; i < deep * 10; i++)

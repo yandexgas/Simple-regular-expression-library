@@ -21,7 +21,6 @@ namespace regex {
 	public:
 		virtual void doAction(std::string::const_iterator&, bool b = true, AutomataState* state = nullptr) {}
 		virtual ~Action() {};
-		virtual int order() { return 1; }
 	};
 
 // Класс перехода (используется только для НКА, для ДКА была сделана его оптимизация, ввиду отсутствия там eps переходов)
@@ -41,10 +40,10 @@ namespace regex {
 		void setCondition(std::string str) {
 			condition = str;
 		}
-		const std::optional<std::string>& getCondition() {
+		const std::optional<std::string>& getCondition() const {
 			return condition;
 		}
-		std::shared_ptr<AutomataState> getTargetState() {
+		std::shared_ptr<AutomataState> getTargetState() const {
 			return targetState.lock();
 		}
 	};
@@ -76,7 +75,7 @@ namespace regex {
 			number = t;
 			return *this;
 		}
-		inline const unsigned short getNumber() {
+		inline const unsigned short getNumber() const {
 			return number;
 		}
 		virtual AutomataState& addTransition(std::shared_ptr<AutomataState>target, std::optional<std::string> condition = {}) {
@@ -121,7 +120,7 @@ namespace regex {
 			}
 			return nullptr;
 		}
-		AutomataState& makeTransition(std::shared_ptr<AutomataState>&);
+		//AutomataState& makeTransition(std::shared_ptr<AutomataState>&);
 		virtual std::list<std::unique_ptr<Transition>>* getAllTransitions() {
 			return &transitions_;
 		}

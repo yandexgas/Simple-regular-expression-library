@@ -2,11 +2,6 @@
 namespace regex {
 
 
-    AutomataState& regex::AutomataState::makeTransition(std::shared_ptr<AutomataState>&)
-    {
-        return *this;
-    }
-
     std::optional<std::shared_ptr<AutomataState>> regex::Transition::makeTransition(std::string::const_iterator* c)
     {
 

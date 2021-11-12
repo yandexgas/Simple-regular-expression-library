@@ -66,9 +66,9 @@ namespace rgx {
 		Regular_expression(Regular_expression& obj) :regular_expression_dfa_(obj.regular_expression_dfa_) {}
 		Regular_expression(Regular_expression&&);
 		~Regular_expression() {};
-		std::string restore_expression();
-		Regular_expression make_language_inversion() noexcept;
-		Regular_expression make_language_addition() noexcept ;
+		std::string restore_expression() const;
+		Regular_expression make_language_inversion() const noexcept;
+		Regular_expression make_language_addition() const noexcept ;
 
 		Regular_expression& operator=(Regular_expression&);
 		Regular_expression& operator=(Regular_expression&&);

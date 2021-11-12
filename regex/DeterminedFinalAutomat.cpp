@@ -119,7 +119,7 @@ namespace regex {
 
 	
 
-	bool DeterminedFinalAutomat :: checkString(std::string str) {
+	bool DeterminedFinalAutomat :: checkString(std::string str) const {
 		NamedGroup::tableClear();
 		auto current = start_;
 		auto c = str.cbegin();
@@ -305,7 +305,7 @@ namespace regex {
 		nonacceptStates_.clear();*/
 	}
 
-	std::string DeterminedFinalAutomat::regexRecover() {
+	std::string DeterminedFinalAutomat::regexRecover() const {
 		
 		std::optional<std::string >*** memoryMatrix = new std::optional<std::string>**[states_count_];
 		for (int i = 0; i < states_count_; i++) {
@@ -361,7 +361,7 @@ namespace regex {
 		return result;
 	}
 
-	std::string DeterminedFinalAutomat::k_path(std::optional<std::string >*** memoryMatrix, std::unordered_set<std::string>& meta, std::shared_ptr<AutomataState> i, std::shared_ptr<AutomataState> j, unsigned short k) {
+	std::string DeterminedFinalAutomat::k_path(std::optional<std::string >*** memoryMatrix, std::unordered_set<std::string>& meta, std::shared_ptr<AutomataState> i, std::shared_ptr<AutomataState> j, unsigned short k) const {
 		unsigned short in = i->getNumber()-1, jn = j->getNumber()-1;
 		if (k == 0) {
 			if (!memoryMatrix[in][jn][k]) {
@@ -456,7 +456,7 @@ namespace regex {
 		return *this;
 	}
 
-	std::shared_ptr<AutomataState>  DeterminedFinalAutomat::mergeStates(std::shared_ptr<AutomataState>fst, std::shared_ptr<AutomataState>scd) noexcept {
+	std::shared_ptr<AutomataState>  DeterminedFinalAutomat::mergeStates(std::shared_ptr<AutomataState>fst, std::shared_ptr<AutomataState>scd) const noexcept {
 		std::shared_ptr<AutomataState> result = std::make_shared<DfaState>();
 			result->addEntranceAction((*fst).getEntranceActions());
 			result->addEExitAction((*fst).getExitActions());
@@ -465,7 +465,7 @@ namespace regex {
 		return result;
 	}
 
-	DeterminedFinalAutomat DeterminedFinalAutomat::operator*(const DeterminedFinalAutomat& obj) noexcept {
+	DeterminedFinalAutomat DeterminedFinalAutomat::operator*(const DeterminedFinalAutomat& obj) const noexcept {
 		std::vector<std::pair<std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>>> oldToNew;
 		DeterminedFinalAutomat result;
 		for (int i = 0; i < allStates.size(); i++) {
@@ -510,7 +510,7 @@ namespace regex {
 		result.allStates.push_back(error);
 		return result;
 	}
-	std::vector<std::string> DeterminedFinalAutomat::findAll(std::string str, std::vector<std::unordered_map<std::string, std::string>>* groups) {
+	std::vector<std::string> DeterminedFinalAutomat::findAll(std::string str, std::vector<std::unordered_map<std::string, std::string>>* groups) const {
 		std::vector<std::string> result;
 		auto c = str.cbegin();
 		auto last_accept = c;

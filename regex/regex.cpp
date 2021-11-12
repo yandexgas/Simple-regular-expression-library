@@ -30,7 +30,6 @@
 	//std::int8_t Leaf::priority{ 0 };
 
 //	std::int16_t LinkNamedGroup::links{ 0 };
-
 //	std::shared_ptr<std::unordered_map<std::string, std::string>> NamedGroup::groups{ std::make_shared<std::unordered_map<std::string,std::string>>() };
 //	std::shared_ptr<std::unordered_map<std::string, std::string>> LinkNamedGroup::groups = { NamedGroup::groups };
 

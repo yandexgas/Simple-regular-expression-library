@@ -32,16 +32,16 @@ namespace rgx {
 		regular_expression_dfa_ = std::move(obj.regular_expression_dfa_);
 	}
 
-	std::string Regular_expression::restore_expression() {
+	std::string Regular_expression::restore_expression() const {
 		return regular_expression_dfa_.regexRecover();
 	}
 
-	Regular_expression Regular_expression::make_language_inversion() noexcept{
+	Regular_expression Regular_expression::make_language_inversion() const noexcept{
 		Regular_expression res(restore_expression(), true);
 		return res;
 	}
 
-	Regular_expression Regular_expression::make_language_addition() noexcept {
+	Regular_expression Regular_expression::make_language_addition() const noexcept {
 		SintaxTree full(".+?");
 		DeterminedFinalAutomat full_lang(full.stealNfa(), full.getAlphabet());
 		DeterminedFinalAutomat addition;
