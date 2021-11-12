@@ -4,7 +4,7 @@
 #include <ranges>
 namespace regex {
 	int containState(std::vector<std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>>& src, std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> find) {
-		int j = 0;
+		size_t j = 0;
 		for (auto i = src.cbegin(); i != src.cend(); i++,j++) {
 
 			if(DeterminedFinalAutomat::statesEquals(*i,find))
@@ -20,7 +20,7 @@ namespace regex {
 		stateGroups_toProcess.push_back(start);
 		std::vector<std::list<std::pair<std::string, int>>> transitionTable;
 
-		for (int i = 0; i < stateGroups_toProcess.size(); i++) {
+		for (size_t i = 0; i < stateGroups_toProcess.size(); i++) {
 			transitionTable.push_back({});
 			std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> current;
 			for (auto j = alphabet.cbegin(); j != alphabet.cend(); j++) {
@@ -39,10 +39,10 @@ namespace regex {
 		std::list<std::shared_ptr<Transition>> trans;
 		allStates.push_back(start_);
 
-		for (int i = 1; i < stateGroups_toProcess.size(); i++)
+		for (size_t i = 1; i < stateGroups_toProcess.size(); i++)
 			allStates.push_back(mergeStates(stateGroups_toProcess[i]));
 
-		for (int i = 0; i < allStates.size(); i++) {
+		for (size_t i = 0; i < allStates.size(); i++) {
 			std::unique_ptr<Transition>delayed = nullptr;
 			for (auto j = transitionTable[i].cbegin(); j != transitionTable[i].cend(); j++) {
 					allStates[i]->addTransition(allStates[j->second], j->first);	
@@ -155,7 +155,7 @@ namespace regex {
 			std::unordered_map<shared_ptr<AutomataState>, shared_ptr<vector<shared_ptr<AutomataState>>>> newgroupsTable;
 			if (!newGroups.empty())
 				groups = std::move(newGroups);
-			for (int i = 0; i < groups.size(); i++) {
+			for (size_t i = 0; i < groups.size(); i++) {
 				if (groups[i]->size() == 1) {
 					newGroups.push_back(groups[i]);
 					auto fst = (*groups[i])[0];
@@ -164,7 +164,7 @@ namespace regex {
 					}
 					continue;
 				}
-				for (int j = 0; j < groups[i]->size(); j++) {
+				for (size_t j = 0; j < groups[i]->size(); j++) {
 					auto fst = (*groups[i])[j];
 					if (!newgroupsTable.contains(fst)) {
 						std::shared_ptr<std::vector<std::shared_ptr<AutomataState>>> tmp = std::make_shared<std::vector<std::shared_ptr<AutomataState>>>();
@@ -172,7 +172,7 @@ namespace regex {
 						newgroupsTable[fst] = tmp;
 						newGroups.push_back(tmp);
 					}
-					for (int k = j+1; k < groups[i]->size(); k++) {
+					for (size_t k = j+1; k < groups[i]->size(); k++) {
 						auto scd = (*groups[i])[k];
 						bool add = true;
 						if (!newgroupsTable.contains(scd)) {
@@ -468,8 +468,8 @@ namespace regex {
 	DeterminedFinalAutomat DeterminedFinalAutomat::operator*(const DeterminedFinalAutomat& obj) const noexcept {
 		std::vector<std::pair<std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>>> oldToNew;
 		DeterminedFinalAutomat result;
-		for (int i = 0; i < allStates.size(); i++) {
-			for (int j = 0; j < obj.allStates.size(); j++) {
+		for (size_t i = 0; i < allStates.size(); i++) {
+			for (size_t j = 0; j < obj.allStates.size(); j++) {
 				result.allStates.push_back(mergeStates(allStates[i], obj.allStates[j]));
 				if (result.start_ == nullptr && allStates[i] == start_ && obj.allStates[j] == obj.start_)
 					result.start_ = result.allStates.back();
@@ -485,14 +485,14 @@ namespace regex {
 		std::shared_ptr<AutomataState> error = std::make_shared<DfaState>(true);
 		error->setNumber(result.allStates.size() + 1);
 		error->addTransition(error, "");
-		for (int i = 0; i < result.allStates.size(); i++) {
+		for (size_t i = 0; i < result.allStates.size(); i++) {
 			std::unique_ptr<std::list<std::unique_ptr<Transition>>> lst(oldToNew[i].second->getAllTransitions());
 			if (!lst->empty()) {
 				for (auto j = lst->begin(); j != lst->end(); j++) {
 					auto tmp = oldToNew[i].first->makeTransition((**j).getCondition().value(), true);
 					if (tmp) {
 						std::pair<std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>> tmp_pair(tmp, (**j).getTargetState());
-						for (int k = 0; k < oldToNew.size(); k++) {
+						for (size_t k = 0; k < oldToNew.size(); k++) {
 							if (oldToNew[k] == tmp_pair) {
 								result.allStates[i]->addTransition(result.allStates[k], (**j).getCondition());
 								break;

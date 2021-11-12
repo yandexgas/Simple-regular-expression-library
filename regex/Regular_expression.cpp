@@ -28,7 +28,7 @@ namespace rgx {
 		regular_expression_dfa_ = dfa;
 	}
 
-	Regular_expression::Regular_expression(Regular_expression&& obj) {
+	Regular_expression::Regular_expression(Regular_expression&& obj) noexcept {
 		regular_expression_dfa_ = std::move(obj.regular_expression_dfa_);
 	}
 
@@ -56,7 +56,7 @@ namespace rgx {
 		return *this;
 	}
 
-	Regular_expression& Regular_expression::operator=(Regular_expression&& obj) {
+	Regular_expression& Regular_expression::operator=(Regular_expression&& obj) noexcept {
 		regular_expression_dfa_ = std::move(obj.regular_expression_dfa_);
 		return *this;
 	}

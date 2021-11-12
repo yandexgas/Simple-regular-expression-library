@@ -11,7 +11,7 @@ namespace regex {
         else if (condition.value().size() > 1) {
             auto tmp = *c;
             try {
-                for (int i = 0; i < condition.value().size(); i++) {
+                for (size_t i = 0; i < condition.value().size(); i++) {
                     if (condition.value()[i] != *tmp) {
                         return{};
                     }

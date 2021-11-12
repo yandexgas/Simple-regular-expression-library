@@ -47,7 +47,7 @@ namespace regex {
 							auto tmp = *c;
 							try {
 								bool ret = true;
-								for (int j = 0; j < (*i).first.size(); j++) {
+								for (size_t j = 0; j < (*i).first.size(); j++) {
 									if ((*i).first[j] != *tmp) {
 										ret = false;
 										break;
