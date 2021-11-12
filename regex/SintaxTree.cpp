@@ -2,7 +2,7 @@
 
 namespace regex {
 	bool SintaxTree::buildTreePrepare(const std::string& sourceString) noexcept{
-
+		NamedGroup::tableClear();
 		std::vector<std::unique_ptr<Node>> nodeTemlates;
 		nodeTemlates.emplace_back(std::make_unique<ScriningNode>());
 		nodeTemlates.emplace_back(std::make_unique<NamedGroup>("",sourceString.cend()));

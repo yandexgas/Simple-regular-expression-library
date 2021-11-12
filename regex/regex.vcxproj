@@ -162,6 +162,7 @@
     <ClInclude Include="NondeterminedFinalAutomata.h" />
     <ClInclude Include="Regular_expression.h" />
     <ClInclude Include="SintaxTree.h" />
+    <ClInclude Include="SintaxTree_Exception.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

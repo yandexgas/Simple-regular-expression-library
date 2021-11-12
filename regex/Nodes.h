@@ -10,6 +10,7 @@
 #include <list>
 #include<sstream>
 #include "NondeterminedFinalAutomata.h"
+#include "SintaxTree_Exception.h"
 namespace regex {
 // Перечисление типов узлов, нужно чтобы быстро определять тип класса не используя typeId
 	enum class NodeTypes {
@@ -184,7 +185,7 @@ namespace regex {
 				}
 				else
 				{
-					throw std::logic_error("Incorrect usage of operation: " + (int)((*iter)->getType()));
+					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
 				}
 					break; 
 			}
@@ -195,7 +196,7 @@ namespace regex {
 				}
 				else
 				{
-					throw std::logic_error("Incorrect usage of operation: " + (int)((*iter)->getType()));
+					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
 				}
 				break;
 			}
@@ -228,7 +229,7 @@ namespace regex {
 				}
 				else
 				{
-					throw std::logic_error("Incorrect usage of operation: " + (int)((*iter)->getType()));
+					throw SintaxTree_Exception("Incorrect usage of operation. Some of oherations have less operands then they should.");
 				}		
 				return true;
 		}		
@@ -325,6 +326,12 @@ namespace regex {
 		};
 	public:
 		NamedGroup( std::string name = "", const std::string::const_iterator end = {}) :UnaryMetaNode(/*"(<",*/ 1), eos_(end), nameOfGroup_(name) {
+			if (groups->contains(name) && name != "") {
+				throw SintaxTree_Exception("repeated usage name of group");
+			}
+			else if (name != "") {
+				(*groups)[name] = "";
+			}
 		};
 		virtual ~NamedGroup() override {
 		}
@@ -386,19 +393,19 @@ namespace regex {
 		virtual std::string getSimbol() noexcept override {
 			return NamedGroup::sign + nameOfGroup_ + ">";
 		}
-		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
+		/*virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
 			if (complited())
 				return false;
 			UnaryMetaNode::setChild(iter);
 			if (complited()) {
 				if (groups->contains(nameOfGroup_))
-					throw std::logic_error("repeted usage name for group: " + nameOfGroup_);
+					throw SintaxTree_Exception("repeted usage name for group: " + nameOfGroup_);
 				else
 					(*groups)[nameOfGroup_] = "";
 			}
 			return true;
 
-		}
+		}*/
 		virtual void buildNfa()override {
 			automatOfNode = right_->stealNodesNfa();
 			bool ofset = false;
@@ -646,7 +653,7 @@ namespace regex {
 							dia.second = std::stoi(second);
 
 						if (dia.first && dia.second && dia.first > dia.second) {
-							throw std::logic_error("left value of repeat diapason greater than right value.");
+							throw SintaxTree_Exception("left value of repeat diapason greater than right value.");
 						}
 
 						auto f = eos_;
@@ -803,11 +810,17 @@ namespace regex {
 			LinkGroupAction(std::string& name,std::string link): nameofgroup_(name),link(link){}
 			virtual ~LinkGroupAction() override {};
 			virtual void doAction(std::string::const_iterator& c, bool b =false,AutomataState* state = nullptr)override {
+				if ((*groups).contains(nameofgroup_)) {
 					std::string str = (*groups)[nameofgroup_];
 					auto tmp = state->makeTransition(link);
 					if (tmp) {
 						state->changeCondition(link, str);
 					}
+				}
+				else
+				{
+					throw std::logic_error("attempt to access an uninitialized capture group");
+				}
 			}
 			virtual int order() {
 				return 0;
@@ -886,6 +899,9 @@ namespace regex {
 			return OpenPriority::priority;
 		}
 		virtual void buildNfa()override {}
+		virtual bool complited()noexcept override {
+			return false;
+		}
 	};
 	class ClosePriority :public  SoloMetaNode
 	{
@@ -908,5 +924,8 @@ namespace regex {
 			return ClosePriority::priority;
 		}
 		virtual void buildNfa()override {}
+		virtual bool complited()noexcept override {
+			return false;
+		}
 	};
 }

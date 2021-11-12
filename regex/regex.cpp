@@ -80,6 +80,12 @@ int main()
 		}
 	}
 	std::cout << "1";*/
+	try {
+		rgx::Regular_expression r("a|");
+	}
+	catch (regex::SintaxTree_Exception e) {
+		std::cout << e;
+	}
 	for (int i = 0; i < 1111111; i++) {
 		rgx::Regular_expression r("mephi&&|@&.?ru+");
 		rgx::Regular_expression r3("(<a>(ac)|(bd))1?");
@@ -100,9 +106,9 @@ int main()
 		//findAll
 		auto c = rgx::findAll("sacbd1ac1f", r3,true);
 		rgx::Regular_expression r4("((<a>a)|(<b>b))<a><b>");
-		rs = rgx::checkString("bb", r4);
-		rgx::Regular_expression r5("(<mail>(m|a|i|l|g){2,8})&.com #<mail>");
-		rs = rgx::checkString("gmail.com #gmail", r5);
+		rs = rgx::checkString("bbb", r4);
+		rgx::Regular_expression r5("(<name>.{2,8})@(<mail>(m|a|i|l|g){2,8})&.com #(<k>(abr)|<mail>)");
+		rs = rgx::checkString("yan.gas@gmail.com #gmail", r5);
 
 	}
 }

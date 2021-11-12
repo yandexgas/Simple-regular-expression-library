@@ -36,8 +36,9 @@ namespace regex {
 			std::string str(1, **c);
 			if (transitions_.contains(str)) {
 				doExit(*c);
-				transitions_[str].lock()->doEnter(*c);
-				return transitions_[str].lock();
+				auto t = transitions_[str].lock();
+				t->doEnter(*c);
+				return t;
 			}
 			else {
 				if (hasLinkGroup) {
@@ -54,8 +55,11 @@ namespace regex {
 									tmp++;
 								}
 								if (ret) {
+									doExit(*c);
 									*c = --tmp;
-									return (*i).second.lock();
+									auto t = (*i).second.lock();
+									t->doEnter(*c);
+									return t;
 								}
 							}
 							catch (...) {}
@@ -63,7 +67,10 @@ namespace regex {
 					}
 				}
 				if (transitions_.contains("")) {
-					return transitions_[""].lock();
+					doExit(*c);
+					auto t = transitions_[""].lock();
+					t->doEnter(*c);
+					return t;
 				}
 				else return nullptr;
 			}
