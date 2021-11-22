@@ -68,21 +68,34 @@ namespace rgx {
 
 	bool checkString(std::string str, std::string regular, RgxResult& rs) {
 		Regular_expression reg(regular, 1);
-		bool res = reg.regular_expression_dfa_.checkString(str);
+		return checkString(str, reg, rs);
+		/*bool res = reg.regular_expression_dfa_.checkString(str);
 		if (res)
 			rs.goodSubstr.push_back(str);
-		rs.namedGroups.value().push_back(regex::NamedGroup::getTable());
-		return res;
+		if (!rs.namedGroups) {
+			std::vector<std::unordered_map<std::string, std::string>> tmpres;
+			tmpres.push_back(regex::NamedGroup::getTable());
+			rs.namedGroups = std::move(tmpres);
+		}
+		else
+			rs.namedGroups.value().push_back(regex::NamedGroup::getTable());
+		return res;*/
 	}
 
 	bool checkString(std::string str, Regular_expression& regular) noexcept {
 		return regular.regular_expression_dfa_.checkString(str);
 	}
-	bool checkString(std::string str, Regular_expression& regular, RgxResult& rs) noexcept{
+	bool checkString(std::string str, Regular_expression& regular, RgxResult& rs) noexcept {
 		bool res = regular.regular_expression_dfa_.checkString(str);
 		if (res)
 			rs.goodSubstr.push_back(str);
-		rs.namedGroups.value().push_back(regex::NamedGroup::getTable());
+		if (!rs.namedGroups) {
+			std::vector<std::unordered_map<std::string, std::string>> tmpres;
+			tmpres.push_back(regex::NamedGroup::getTable());
+			rs.namedGroups = std::move(tmpres);
+		}
+		else
+			rs.namedGroups.value().push_back(regex::NamedGroup::getTable());
 		return res;
 	}
 

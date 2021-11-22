@@ -290,12 +290,12 @@ namespace regex {
 			std::string nameofgroup_;
 			bool ofset;
 			void doAsExit(std::string::const_iterator& currentChar) noexcept {
-				if (currentChar > begin)
+				if (!begin._Ptr || currentChar > begin)
 					begin = currentChar;
 			};
 			void doAsEnter(std::string::const_iterator& currentChar)  {
 				if (begin._Ptr != nullptr) {
-					if (currentChar >= end)
+					if (!end._Ptr || currentChar >= end)
 						end = currentChar;
 					std::string str;
 					if (begin <= end) {

@@ -23,7 +23,7 @@ namespace regex {
 		std::shared_ptr<Node> root_;
 		std::list<std::shared_ptr<Node>> nodesList_;
 		std::unordered_set<std::string> alphabet;
-		bool buildTreePrepare(const std::string& sourceString) noexcept;
+		bool buildTreePrepare(const std::string& sourceString);
 		void build(bool inverse = false);
 		void build(std::list<std::shared_ptr<Node>>::iterator, std::list<std::shared_ptr<Node>>::iterator, bool inverse = false);
 	public:

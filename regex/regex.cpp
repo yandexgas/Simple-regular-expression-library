@@ -79,7 +79,10 @@ int main()
 		}
 	}
 	std::cout << "1";*/
-	bool rs = false;
+	bool rs = false;	
+	auto rzz = new rgx::Regular_expression("(<a>a)");
+	rgx::RgxResult res;
+	rs = checkString("a", *rzz, res);
 	try {
 		rgx::Regular_expression r("a|");
 	}
