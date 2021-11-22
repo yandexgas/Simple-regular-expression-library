@@ -23,8 +23,8 @@
 	//std::int8_t PositiveClosureNode::priority{ 3 };
 	//std::int8_t OptionNode::priority{ 3 };
 	//std::int8_t RepeatNode::priority{ 3 };
-	//std::int8_t OrNode::priority{ 2 };
-	//std::int8_t ConcatNode::priority{ 1 };
+	//std::int8_t OrNode::priority{ 1};
+	//std::int8_t ConcatNode::priority{ 2 };
 	//std::int8_t AnyNode::priority{ 0 };
 	//std::int8_t LinkNamedGroup::priority{ 0 };
 	//std::int8_t Leaf::priority{ 0 };
@@ -79,16 +79,20 @@ int main()
 		}
 	}
 	std::cout << "1";*/
+	bool rs = false;
 	try {
 		rgx::Regular_expression r("a|");
 	}
 	catch (regex::SintaxTree_Exception e) {
 		std::cout << e;
 	}
-	bool rs = false;
+	
 	for (int i = 0; i < 1111111; i++) {
-		rgx::Regular_expression st("&?");
-		rs = rgx::checkString("?", st);
+		rgx::Regular_expression st("(<a>a|b(<d>c|d))");
+		rs = rgx::checkString("ac", st);
+		rs = rgx::checkString("bc", st);
+		rs = rgx::checkString("b", st);
+		rs = rgx::checkString("a", st);
 		rs = rgx::checkString("(<name>faf", "&(<name>faf)");
 		rgx::Regular_expression stt("&(<name>faf)");
 		rgx::Regular_expression r("mephi&&|@&.?ru+");
@@ -100,20 +104,30 @@ int main()
 		rs = rgx::checkString("mephru", r1);
 		rs = rgx::checkString("mephi&.ru", r1);
 		rs = rgx::checkString("mephi&ruuuu", r1);
+		rs = rgx::checkString("mephi&", r1);
+		rs = rgx::checkString("@.ruuu", r1);
+		rs = rgx::checkString("@ruuu", r1);
+		rs = rgx::checkString("@druuu", r1);
 		////
 		//Инверсия
 		rgx::Regular_expression r2(r.make_language_inversion());
 		rs = rgx::checkString("mephi&ru", r2);
 		rs = rgx::checkString("uuur.@ihpem", r2);
 		rs = rgx::checkString("ur&ihpem", r2);
-		rs = rgx::checkString("mephi&ruuuu", r2);
+		rs = rgx::checkString("uuur@", r2);
+		rs = rgx::checkString("&ihpem", r2);
+		rgx::Regular_expression r6("b&.?r{2,4}");
+		rgx::Regular_expression r7(r6.make_language_inversion());
+		rs = rgx::checkString("rr.b", r7);
+		rs = rgx::checkString("rrrrb", r7);
+		rs = rgx::checkString("rrrb", r7);
 		//findAll
 		auto c = rgx::findAll("sacbd1ac1f", r3,true);
 		rgx::Regular_expression r4("((<a>a)|(<b>b))<a><b>");
 		rs = rgx::checkString("bbb", r4);
-		rgx::Regular_expression r5("(<name>.{2,8})@(<mail>(m|a|i|l|g){2,8})&.com #(<k>(abr)|<mail>)");
+		rgx::Regular_expression r5("(<name>.{2,8})@(<mail>(m|a|i|l|g){2,8})&.com #(<k>abr|<mail>)");
 		rs = rgx::checkString("yan.gas@gmail.com #gmail", r5);
-
+		rs = rgx::checkString("yan.gas@gmail.com #abr", r5);
 	}
 }
 

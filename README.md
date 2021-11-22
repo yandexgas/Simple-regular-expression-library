@@ -5,10 +5,7 @@ Additionally, you can perform some operations with deterministic state machines 
 The syntax for this regular expression language is:
 
  # Operation "or": r1 | r2 (metacharacter '|').
-	 NOTE:  In the current version, this operation takes precedence over
-   		   the concatenation operation due to a slight oversight. It will be fixed in a future version that for now you can use operator 
-   	  	   brackets to specify operands longer than one character
-
+	 
  # Concatenation operation: r1r2
 
  # Operation "positive closure": r + (metacharacter '+') - repeating the operand 1 or more times

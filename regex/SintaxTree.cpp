@@ -115,7 +115,7 @@ namespace regex {
 	}
 
 	void SintaxTree::build(std::list<std::shared_ptr<Node>>::iterator beg, std::list<std::shared_ptr<Node>>::iterator end, bool inverse ) {
-		for (int prior = 4; prior > 1; prior--) {
+		for (int prior = 4; prior > 2; prior--) {
 			for (auto i = beg; i != end; i++) {
 				if ((**i).getPriority() == prior) {
 					if ((**i).setChild(i)) {
@@ -125,14 +125,6 @@ namespace regex {
 							auto prev = i;
 							nodesList_.erase(++i);
 							i = prev;
-							break; }
-						case regex::NodeTypes::OR: {
-							auto prev = i;
-							nodesList_.erase(++i);
-							i = --prev;
-							prev--;
-							nodesList_.erase(i);
-							i = ++prev;
 							break; }
 						case regex::NodeTypes::POSITIVE_ÑLOSURE: {
 							auto prev = --i;
@@ -158,7 +150,7 @@ namespace regex {
 							i = prev;
 							break; }
 						default:
-							throw std::runtime_error("Shock");
+							throw std::runtime_error("Shock! Unexpected operation type with strange priority.");
 						}
 					}
 				}
@@ -169,7 +161,10 @@ namespace regex {
 		for (; i != end; i++) {
 			auto ptr = i;
 			ptr++;
-			if (ptr != end) {
+			if (ptr != end  
+				&& ((*ptr)->getType() != NodeTypes::OR || (*ptr)->complited())
+				&& ((*i)->getType() != NodeTypes::OR || (*i)->complited())) 
+			{
 				nodesList_.emplace(ptr, std::make_shared<ConcatNode>());
 				ptr = i;
 				ptr++;
@@ -177,8 +172,27 @@ namespace regex {
 				nodesList_.erase(++ptr);
 				ptr = i;
 				i--;
-				nodesList_.erase(ptr);
-				
+				nodesList_.erase(ptr);	
+			}
+		}
+		for (auto i = beg; i != end; i++) {
+			if ((**i).getPriority() == 1) {
+				if ((**i).setChild(i)) {
+					switch ((**i).getType())
+					{
+					case regex::NodeTypes::OR: {
+						auto prev = i;
+						nodesList_.erase(++i);
+						i = --prev;
+						prev--;
+						nodesList_.erase(i);
+						i = ++prev;
+						break; 
+					}
+					default:
+						throw std::runtime_error("Shock! Unexpected operation type with strange priority.");
+					}
+				}
 			}
 		}
 		nodesList_.erase(beg);

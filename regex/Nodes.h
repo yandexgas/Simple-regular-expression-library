@@ -424,7 +424,7 @@ namespace regex {
 	class ConcatNode:public BinaryMetaNode
 	{
 	private:
-		static const std::int8_t priority = 1;
+		static const std::int8_t priority = 2;
 	public:
 		ConcatNode() :BinaryMetaNode() {};
 		virtual NodeTypes getType() const override {
@@ -463,7 +463,7 @@ namespace regex {
 	class OrNode:public BinaryMetaNode
 	{
 	private:
-		static const std::int8_t priority = 2;
+		static const std::int8_t priority = 1;
 		static std::string sign;
 	public:
 		OrNode() :BinaryMetaNode() {}
