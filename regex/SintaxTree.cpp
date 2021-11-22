@@ -81,7 +81,7 @@ namespace regex {
 	}
 	
 	void SintaxTree::build(bool inverse) {
-
+		NamedGroup::tableClear();
 		std::stack<std::list<std::shared_ptr<Node>>::iterator> openBrakets;
 		for (auto i = nodesList_.begin(); i != nodesList_.end(); ++i) {
 			if ((*i)->getType() == NodeTypes::SCREENING) {
@@ -98,7 +98,16 @@ namespace regex {
 				openBrakets.pop();
 				if (prev != nodesList_.cbegin()) {
 					build(prev--, i,inverse);
-					i = ++prev;
+					if ((*prev)->getType() == NodeTypes::NAMED_GROUP) {
+						if ((**prev).setChild(prev)) {
+							auto z = prev;
+							nodesList_.erase(++prev);
+							prev = z;
+							i = prev;
+							continue;
+						}
+					}
+						i = ++prev;	
 				}
 				else {
 					build(prev, i,inverse);
@@ -111,6 +120,8 @@ namespace regex {
 		if(nodesList_.size()>1)
 			throw SintaxTree_Exception(')');
 		root_ = nodesList_.front();
+		if (!root_->complited())
+			throw SintaxTree_Exception("incorrect in Node: " + root_->getSimbol());
 		nodesList_.clear();
 	}
 

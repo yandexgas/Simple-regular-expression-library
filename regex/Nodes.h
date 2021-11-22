@@ -285,24 +285,29 @@ namespace regex {
 		{
 		private:
 			bool visited=false;
-			std::string::const_iterator begin;
-			std::string::const_iterator end;
+			std::optional<std::string::const_iterator> begin;
+			std::optional<std::string::const_iterator> end;
 			std::string nameofgroup_;
 			bool ofset;
 			void doAsExit(std::string::const_iterator& currentChar) noexcept {
-				if (!begin._Ptr || currentChar > begin)
-					begin = currentChar;
+				if (!groups->contains(nameofgroup_)) {
+					begin = {};
+					end = {};
+					(*groups)[nameofgroup_] = "";
+				}
+					if (!begin || currentChar > begin.value())
+						begin = currentChar;
 			};
 			void doAsEnter(std::string::const_iterator& currentChar)  {
-				if (begin._Ptr != nullptr) {
-					if (!end._Ptr || currentChar >= end)
-						end = currentChar;
+				if (groups->contains(nameofgroup_)&&begin) {
+						if (!end || currentChar >= end.value())
+							end = currentChar;
 					std::string str;
 					if (begin <= end) {
-						auto tmp = begin;
+						auto tmp = begin.value();
 						for (; tmp != end; tmp++)
 							str += *tmp;
-						str += *end;
+						str += *(end.value());
 						tmp++;
 					}
 					(*groups)[nameofgroup_] = str;
@@ -381,19 +386,16 @@ namespace regex {
 		virtual std::string getSimbol() const noexcept override {
 			return NamedGroup::sign + nameOfGroup_ + ">";
 		}
-		/*virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
+		virtual bool setChild(std::list<std::shared_ptr<Node>>::iterator iter, bool inverse = false) override {
 			if (complited())
 				return false;
 			UnaryMetaNode::setChild(iter);
 			if (complited()) {
-				if (groups->contains(nameOfGroup_))
-					throw SintaxTree_Exception("repeted usage name for group: " + nameOfGroup_);
-				else
 					(*groups)[nameOfGroup_] = "";
 			}
 			return true;
 
-		}*/
+		}
 		virtual void buildNfa() override {
 			automatOfNode = right_->stealNodesNfa();
 			bool ofset = false;
@@ -792,16 +794,24 @@ namespace regex {
 		{
 		private:
 			std::string nameofgroup_;
+			const std::string constLink;
 			std::string link;
+
 		public:
-			LinkGroupAction(std::string& name,std::string link): nameofgroup_(name),link(link){}
+			LinkGroupAction(std::string& name,std::string link): nameofgroup_(name),link(link),constLink(link){}
 			virtual ~LinkGroupAction() override {};
 			virtual void doAction(std::string::const_iterator& c, bool b =false,AutomataState* state = nullptr)override {
 				if ((*groups).contains(nameofgroup_)) {
 					std::string str = (*groups)[nameofgroup_];
-					auto tmp = state->makeTransition(link);
-					if (tmp) 
-						state->changeCondition(link, str);
+					//if (link != str) {
+						auto tmp = state->makeTransition(link);
+						auto lnk = tmp ? link : constLink;
+						tmp=tmp?tmp: state->makeTransition(constLink);
+						if (tmp) {
+							state->changeCondition(lnk, str);
+							link = str;
+						}
+					//}
 				}
 				else
 					throw std::logic_error("attempt to access an uninitialized capture group");

@@ -19,9 +19,9 @@ namespace rgx {
 // и так же значени€ из всех групп захвата регул€рного выражени€ (если они есть).
 	bool checkString(std::string, std::string, RgxResult&);
 // функци€ выполн€ет анализ строки по заранее созданному объекту регул€рного выражени€
-	bool checkString(std::string, Regular_expression&)noexcept;
+	bool checkString(std::string, Regular_expression&);
 // функци€ выполн€ет анализ строки по заранее созданному объекту регул€рного выражени€ и записывает значени€ всех групп захвата в объект RgxResult
-	bool checkString(std::string, Regular_expression&, RgxResult&) noexcept;
+	bool checkString(std::string, Regular_expression&, RgxResult&);
 // »щет все непересекающиес€ вхождени€ подстрок строки 1, которые подход€т под регул€рное выражение строки 2,
 // если links = true, в возвращенном объекте помимо подстрок будет массим соответствующих им значений групп зыхвата
 	RgxResult findAll(std::string, std::string, bool links = false);
@@ -52,8 +52,8 @@ namespace rgx {
 		Regular_expression(DeterminedFinalAutomat& at) : regular_expression_dfa_(at) {}
 		friend bool checkString(std::string, std::string);
 		friend bool checkString(std::string, std::string, RgxResult&);
-		friend bool checkString(std::string, Regular_expression&) noexcept;
-		friend bool checkString(std::string, Regular_expression&, RgxResult&) noexcept;
+		friend bool checkString(std::string, Regular_expression&);
+		friend bool checkString(std::string, Regular_expression&, RgxResult&);
 		friend RgxResult findAll(std::string, std::string, bool links);
 		friend RgxResult findAll(std::string, Regular_expression&, bool links);
 		Regular_expression(std::string, int);

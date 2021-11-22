@@ -521,7 +521,8 @@ namespace regex {
 			auto current = start_;
 			current->doEnter(c);
 			auto previous = current;
-			for (auto i = c; i != str.cend(); i++) {
+			auto i = c;
+			for (i = c; i != str.cend(); i++) {
 				previous = current;
 				current = current->makeTransition(&i);
 				if (current == nullptr) {
@@ -565,6 +566,19 @@ namespace regex {
 				}
 					
 			}
+			if (was_accepted) {
+				std::string st = "";
+				for (auto j = c; j <= last_accept; j++) {
+					st += *j;
+				}
+				result.push_back(st);
+				if (groups) {
+					groups->push_back(NamedGroup::getTable());
+				}
+				c = last_accept + 1;
+			}
+			else if (i == str.cend())
+				c++;
 		}
 		
 		return result;

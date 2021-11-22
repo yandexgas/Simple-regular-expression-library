@@ -82,11 +82,14 @@ namespace rgx {
 		return res;*/
 	}
 
-	bool checkString(std::string str, Regular_expression& regular) noexcept {
+	bool checkString(std::string str, Regular_expression& regular) {
 		return regular.regular_expression_dfa_.checkString(str);
 	}
-	bool checkString(std::string str, Regular_expression& regular, RgxResult& rs) noexcept {
+	bool checkString(std::string str, Regular_expression& regular, RgxResult& rs) {
 		bool res = regular.regular_expression_dfa_.checkString(str);
+		rs.goodSubstr.clear();
+		if (rs.namedGroups)
+			rs.namedGroups.value().clear();
 		if (res)
 			rs.goodSubstr.push_back(str);
 		if (!rs.namedGroups) {

@@ -80,16 +80,18 @@ int main()
 	}
 	std::cout << "1";*/
 	bool rs = false;	
-	auto rzz = new rgx::Regular_expression("(<a>a)");
+	auto rzz = new rgx::Regular_expression("(<a>b|(<c>e|d))");
 	rgx::RgxResult res;
-	rs = checkString("a", *rzz, res);
+	rs = checkString("d", *rzz, res);
 	try {
 		rgx::Regular_expression r("a|");
 	}
 	catch (regex::SintaxTree_Exception e) {
 		std::cout << e;
 	}
-	
+	rgx::Regular_expression r5("(.{2,4})@((m|a|i|l|g){2,5})&.com #(abr|gmail)");
+	auto str = r5.restore_expression();
+	rs = rgx::checkString("yang@gmail.com #abr",r5);
 	for (int i = 0; i < 1111111; i++) {
 		rgx::Regular_expression st("(<a>a|b(<d>c|d))");
 		rs = rgx::checkString("ac", st);
