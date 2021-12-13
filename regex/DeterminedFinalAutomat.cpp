@@ -135,26 +135,24 @@ namespace regex {
 	void DeterminedFinalAutomat::minimization(const std::unordered_set<std::string>& alphabet) {
 		using namespace std;
 		vector<shared_ptr<vector<shared_ptr<AutomataState>>>> groups;
-		shared_ptr<vector<shared_ptr<AutomataState>>> copy = make_shared<vector<shared_ptr<AutomataState>>>(acceptStates_);
-		groups.push_back(copy);
-		copy = make_shared<vector<shared_ptr<AutomataState>>>(nonacceptStates_);
-		groups.push_back(copy);
+		groups.push_back(make_shared<vector<shared_ptr<AutomataState>>>(acceptStates_));
+		groups.push_back(make_shared<vector<shared_ptr<AutomataState>>>(nonacceptStates_));
 		if (start_->isAcceptable()) {
-			copy = make_shared<vector<shared_ptr<AutomataState>>>();
+			auto copy = make_shared<vector<shared_ptr<AutomataState>>>();
 			copy->push_back(start_);
 			groups.push_back(copy);
 		}
 		vector<shared_ptr<vector<shared_ptr<AutomataState>>>> newGroups;
-		std::unordered_map<shared_ptr<AutomataState>, shared_ptr<vector<shared_ptr<AutomataState>>>> groupsTable;
-		for (auto i = groups.begin(); i != groups.end(); i++) {
-			for (auto j = (**i).begin(); j != (**i).end(); j++) {
-				groupsTable[*j] = *i;
+		unordered_map<shared_ptr<AutomataState>, shared_ptr<vector<shared_ptr<AutomataState>>>> groupsTable;
+		for (auto i : groups) {
+			for (auto j : *i) {
+				groupsTable[j] = i;
 			}
 		}
 		while (newGroups.size() != groups.size()) {
-			std::unordered_map<shared_ptr<AutomataState>, shared_ptr<vector<shared_ptr<AutomataState>>>> newgroupsTable;
+			unordered_map<shared_ptr<AutomataState>, shared_ptr<vector<shared_ptr<AutomataState>>>> newgroupsTable;
 			if (!newGroups.empty())
-				groups = std::move(newGroups);
+				groups = move(newGroups);
 			for (size_t i = 0; i < groups.size(); i++) {
 				if (groups[i]->size() == 1) {
 					newGroups.push_back(groups[i]);
@@ -167,7 +165,7 @@ namespace regex {
 				for (size_t j = 0; j < groups[i]->size(); j++) {
 					auto fst = (*groups[i])[j];
 					if (!newgroupsTable.contains(fst)) {
-						std::shared_ptr<std::vector<std::shared_ptr<AutomataState>>> tmp = std::make_shared<std::vector<std::shared_ptr<AutomataState>>>();
+						shared_ptr<vector<shared_ptr<AutomataState>>> tmp = make_shared<vector<shared_ptr<AutomataState>>>();
 						tmp->push_back(fst);
 						newgroupsTable[fst] = tmp;
 						newGroups.push_back(tmp);
@@ -202,11 +200,11 @@ namespace regex {
 			}
 			groupsTable = move(newgroupsTable);
 		}
-		groups = std::move(newGroups);
+		groups = move(newGroups);
 		auto start = groupsTable[start_];
 		allStates.clear();
 		acceptStates_.clear();
-		std::unordered_map<shared_ptr<vector<shared_ptr<AutomataState>>>, shared_ptr<AutomataState>> oldToNew;
+		unordered_map<shared_ptr<vector<shared_ptr<AutomataState>>>, shared_ptr<AutomataState>> oldToNew;
 		for (auto i = groups.begin(); i != groups.end(); i++) {
 				auto tmp = mergeStates(*i);	
 				allStates.push_back(tmp);
@@ -229,6 +227,9 @@ namespace regex {
 		}
 		
 		nonacceptStates_.clear();
+
+		// alternative version. Slower//
+
 		/*vector < std::shared_ptr<list< shared_ptr<AutomataState>>>> groups;
 		bool empt = true;
 		std::shared_ptr<list< shared_ptr<AutomataState>>> g = std::make_shared < list< shared_ptr<AutomataState>>>();
@@ -333,13 +334,6 @@ namespace regex {
 				}
 				result += tmpRes;
 			}
-			/*if (start_->isAcceptable()) {
-				auto tmpRes = k_path(memoryMatrix, meta,start_, start_, states_count_);
-				if (!tmpRes.empty() && !result.empty()) {
-					result += '|';
-				}
-				result += tmpRes;
-			}*/
 		}
 		catch (...) {
 			for (int i = 0; i < states_count_; i++) {
