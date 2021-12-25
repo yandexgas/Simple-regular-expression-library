@@ -94,14 +94,16 @@ The syntax for this regular expression language is:
               then this will be interpreted as a "named" capturing group to separate the "expression" from the parentheses, use the "empty line character".
 
 =============================
-	Exceptions:
+	
+# Exceptions:
 
  # If the syntax of a regular expression is violated, a "SintaxTree_Error" exception is thrown.
  # When parsing a string, the only exception that can be thrown by std :: logic_error is when trying to access an uninitialized capture group.
 =============================
-	Most important objects:
+	
+# Most important objects:
 
- # an object of the "RgxResult" type stores the result of string analysis - an array of correct substrings
+ # An object of the "RgxResult" type stores the result of string analysis - an array of correct substrings
    that have successfully passed the analysis and, optionally, an array of tables with the values ​​of capture groups.
 
  # an object of type "Regular_expression" is a regular expression. 
