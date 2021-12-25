@@ -27,11 +27,7 @@ namespace regex {
 		void build(bool inverse = false);
 		void build(std::list<std::shared_ptr<Node>>::iterator, std::list<std::shared_ptr<Node>>::iterator, bool inverse = false);
 	public:
-		SintaxTree(const std::string& sourceString, bool inverse = false) {
-			buildTreePrepare(sourceString);
-			build(inverse);
-			pass(root_);
-		};
+		SintaxTree(const std::string& sourceString, bool inverse = false);
 		~SintaxTree() { NamedGroup::tableClear(); };
 		void clear() {
 			root_ = nullptr;
@@ -39,25 +35,10 @@ namespace regex {
 		void print() const {
 			int deep = 0;
 			std::shared_ptr<Node> ptr = root_;
-			pass(0, ptr);
-			
+			pass(0, ptr);	
 		}
-		void pass(int deep,std::shared_ptr<Node> w) const {
-			if (w->getLeft() != nullptr)
-				pass(deep + 1, w->getLeft());
-			for (int i = 0; i < deep * 10; i++)
-				std::cout << " ";
-			std::cout << w->getSimbol() << std::endl;
-			if (w->getRight() != nullptr)
-				pass(deep + 1, w->getRight());
-		}
-		void pass(std::shared_ptr<Node>w) {
-			if (w->getLeft() != nullptr)
-				pass(w->getLeft());
-			if (w->getRight() != nullptr)
-				pass(w->getRight());
-			w->buildNfa();		
-		}
+		void pass(int deep, std::shared_ptr<Node> w) const;
+		void pass(std::shared_ptr<Node>w);
 		inline const std::unordered_set <std::string>& getAlphabet() {
 			return alphabet;
 		}

@@ -577,4 +577,91 @@ namespace regex {
 		
 		return result;
 	}
+
+	AutomataState& DfaState::addTransition(std::unique_ptr<Transition> transition){
+		transitions_[transition->getCondition().value()] = transition->getTargetState();
+		if (transition->getCondition().value().size() > 4)
+			hasLinkGroup = true;
+		return *this;
+	}
+	AutomataState& DfaState::addTransition(std::shared_ptr<AutomataState>target, std::optional<std::string> condition) {
+		if (!transitions_.contains(condition.value()))
+			transitions_[condition.value()] = target;
+		if (condition.value().size() > 4)
+			hasLinkGroup = true;
+		return *this;
+	}
+
+	std::shared_ptr <AutomataState> DfaState::makeTransition(std::string::const_iterator* c) {
+		std::string str(1, **c);
+		if (transitions_.contains(str)) {
+			doExit(*c);
+			auto t = transitions_[str].lock();
+			t->doEnter(*c);
+			return t;
+		}
+		else {
+			if (hasLinkGroup) {
+				for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
+					if ((*i).first.size() > 1) {
+						auto tmp = *c;
+						try {
+							bool ret = true;
+							for (size_t j = 0; j < (*i).first.size(); j++) {
+								if ((*i).first[j] != *tmp) {
+									ret = false;
+									break;
+								}
+								tmp++;
+							}
+							if (ret) {
+								doExit(*c);
+								*c = --tmp;
+								auto t = (*i).second.lock();
+								t->doEnter(*c);
+								return t;
+							}
+						}
+						catch (...) {}
+					}
+				}
+			}
+			if (transitions_.contains("")) {
+				doExit(*c);
+				auto t = transitions_[""].lock();
+				t->doEnter(*c);
+				return t;
+			}
+			else return nullptr;
+		}
+	}
+
+	std::shared_ptr <AutomataState> DfaState::makeTransition(std::string str, bool exp)  {
+		if (transitions_.contains(str))
+			return transitions_[str].lock();
+		else if (!exp)
+			return nullptr;
+		else {
+			if (str.size() == 1) {
+				if (transitions_.contains(""))
+					return transitions_[""].lock();
+			}
+		}
+		return nullptr;
+	}
+
+	std::list<std::unique_ptr<Transition>>* DfaState::getAllTransitions()  {
+		std::list<std::unique_ptr<Transition>>* lst = new std::list<std::unique_ptr<Transition>>();
+		for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
+			lst->push_back(std::make_unique<Transition>(i->second.lock(), i->first));
+		}
+		return lst;
+	}
+
+	void DfaState::changeCondition(std::string current, std::string comming) {
+		auto tmp = transitions_[current];
+		transitions_.erase(current);
+		transitions_[comming] = tmp;
+	}
+
 }

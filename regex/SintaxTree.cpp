@@ -209,4 +209,27 @@ namespace regex {
 		nodesList_.erase(beg);
 		nodesList_.erase(end);
 	}
+
+	SintaxTree::SintaxTree(const std::string& sourceString, bool inverse) {
+		buildTreePrepare(sourceString);
+		build(inverse);
+		pass(root_);
+	};
+
+	void SintaxTree::pass(int deep, std::shared_ptr<Node> w) const {
+		if (w->getLeft() != nullptr)
+			pass(deep + 1, w->getLeft());
+		for (int i = 0; i < deep * 10; i++)
+			std::cout << " ";
+		std::cout << w->getSimbol() << std::endl;
+		if (w->getRight() != nullptr)
+			pass(deep + 1, w->getRight());
+	}
+	void SintaxTree::pass(std::shared_ptr<Node>w) {
+		if (w->getLeft() != nullptr)
+			pass(w->getLeft());
+		if (w->getRight() != nullptr)
+			pass(w->getRight());
+		w->buildNfa();
+	}
 }

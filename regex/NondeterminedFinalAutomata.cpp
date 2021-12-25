@@ -36,4 +36,69 @@ namespace regex {
             (**i).doAction(c,false);
         }
     }
+
+    std::shared_ptr <AutomataState> AutomataState::makeTransition(std::string::const_iterator* c) {
+        std::optional<std::shared_ptr<AutomataState>> res = std::nullopt;
+        for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
+            res = (**i).makeTransition(c);
+            if (res) {
+                doExit(*c);
+                res.value()->doEnter(*c);
+                return res.value();
+            }
+        }
+        return nullptr;
+    }
+
+     std::shared_ptr <AutomataState> AutomataState::makeTransition(std::string str, bool exp) {
+        for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
+            if ((**i).getCondition() == str) {
+                return (**i).getTargetState();
+            }
+        }
+        return nullptr;
+    }
+
+     void NondeterminedFinalAutomata::setStartState(std::shared_ptr<AutomataState> start) {
+         if (start->isAcceptable())
+             throw std::logic_error("For algorithm, which hab been used in this lib, start state can't be acceptable state");
+         else {
+             startState_ = start;
+             currentStates_.push_back(startState_);
+         }
+     }
+
+     void NondeterminedFinalAutomata::setAcceptState(std::shared_ptr<AutomataState> state) {
+         if (!state->isAcceptable())
+             throw std::logic_error("State must be acceptable");
+         else {
+             acceptableState_->setAccptable(false);
+             acceptableState_ = state;
+             currentStates_.push_back(acceptableState_);
+         }
+     }
+
+     NondeterminedFinalAutomata& NondeterminedFinalAutomata::operator=(const NondeterminedFinalAutomata& source) {
+         std::unordered_map<std::shared_ptr<AutomataState>, std::shared_ptr<AutomataState>> unordered_map;
+         std::list<std::shared_ptr<AutomataState>> newStates;
+         for (auto i = source.currentStates_.begin(); i != source.currentStates_.end(); i++) {
+             if (!unordered_map.contains(*i)) {
+                 unordered_map.emplace(*i, std::make_shared<AutomataState>((**i).isAcceptable()));
+                 unordered_map[*i]->getEntranceActions() = (*i)->getEntranceActions();
+                 unordered_map[*i]->getExitActions() = (*i)->getExitActions();
+             }
+             currentStates_.emplace_back(unordered_map[*i]);
+             for (auto j = ((*i)->getAllTransitions())->begin(); j != ((*i)->getAllTransitions())->end(); j++) {
+                 if (!unordered_map.contains((*j)->getTargetState())) {
+                     unordered_map.emplace((*j)->getTargetState(), std::make_shared<AutomataState>((*j)->getTargetState()->isAcceptable()));
+                     unordered_map[(*j)->getTargetState()]->getEntranceActions() = (*j)->getTargetState()->getEntranceActions();
+                     unordered_map[(*j)->getTargetState()]->getExitActions() = (*j)->getTargetState()->getExitActions();
+                 }
+                 unordered_map[*i]->addTransition(unordered_map[(*j)->getTargetState()], (*j)->getCondition());
+             }
+         }
+         startState_ = unordered_map[source.startState_];
+         acceptableState_ = unordered_map[source.acceptableState_];
+         return *this;
+     }
 }

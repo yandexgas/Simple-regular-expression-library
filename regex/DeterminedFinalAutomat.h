@@ -19,87 +19,12 @@ namespace regex {
 	public:
 		DfaState (bool isAcceptable = false) : AutomataState(isAcceptable) {}
 		~DfaState()override {};
-		virtual AutomataState& addTransition(std::unique_ptr<Transition> transition)override {
-			transitions_[transition->getCondition().value()] = transition->getTargetState();
-			if (transition->getCondition().value().size() > 4)
-				hasLinkGroup = true;
-			return *this;
-		}
-		virtual AutomataState& addTransition(std::shared_ptr<AutomataState>target, std::optional<std::string> condition = {})override {
-			if(!transitions_.contains(condition.value()))
-			transitions_[condition.value()] = target;
-			if (condition.value().size() > 4)
-				hasLinkGroup = true;
-			return *this;
-		}
-		virtual std::shared_ptr <AutomataState> makeTransition(std::string::const_iterator* c)override {
-			std::string str(1, **c);
-			if (transitions_.contains(str)) {
-				doExit(*c);
-				auto t = transitions_[str].lock();
-				t->doEnter(*c);
-				return t;
-			}
-			else {
-				if (hasLinkGroup) {
-					for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
-						if ((*i).first.size() > 1) {
-							auto tmp = *c;
-							try {
-								bool ret = true;
-								for (size_t j = 0; j < (*i).first.size(); j++) {
-									if ((*i).first[j] != *tmp) {
-										ret = false;
-										break;
-									}
-									tmp++;
-								}
-								if (ret) {
-									doExit(*c);
-									*c = --tmp;
-									auto t = (*i).second.lock();
-									t->doEnter(*c);
-									return t;
-								}
-							}
-							catch (...) {}
-						}
-					}
-				}
-				if (transitions_.contains("")) {
-					doExit(*c);
-					auto t = transitions_[""].lock();
-					t->doEnter(*c);
-					return t;
-				}
-				else return nullptr;
-			}
-		}
-		virtual std::shared_ptr <AutomataState> makeTransition(std::string str, bool exp=false) override {
-			if (transitions_.contains(str))
-				return transitions_[str].lock();
-			else if(!exp)
-			return nullptr;
-			else {
-				if (str.size() == 1) {
-					if (transitions_.contains(""))
-						return transitions_[""].lock();
-				}
-			}
-			return nullptr;
-		}
-		virtual std::list<std::unique_ptr<Transition>>* getAllTransitions() override {
-			std::list<std::unique_ptr<Transition>>* lst = new std::list<std::unique_ptr<Transition>>();
-			for (auto i = transitions_.begin(); i != transitions_.end(); i++) {
-				lst->push_back(std::make_unique<Transition>(i->second.lock(), i->first));
-			}
-			return lst;
-		}
-		virtual void changeCondition(std::string current, std::string comming)override {
-			auto tmp = transitions_[current];
-			transitions_.erase(current);
-			transitions_[comming] = tmp;
-		}
+		AutomataState& addTransition(std::unique_ptr<Transition> transition)override;
+		AutomataState& addTransition(std::shared_ptr<AutomataState>target, std::optional<std::string> condition = {})override;
+		std::shared_ptr <AutomataState> makeTransition(std::string::const_iterator* c)override;
+		std::shared_ptr <AutomataState> makeTransition(std::string str, bool exp = false) override;
+		std::list<std::unique_ptr<Transition>>* getAllTransitions() override;
+		void changeCondition(std::string current, std::string comming)override;
 	};
 // концепт объекта указателя на итерируемый объект
 	template<class T>

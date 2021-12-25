@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeterminedFinalAutomat.cpp" />
+    <ClCompile Include="Nodes.cpp" />
     <ClCompile Include="NondeterminedFinalAutomata.cpp" />
     <ClCompile Include="regex.cpp" />
     <ClCompile Include="Regular_expression.cpp" />
