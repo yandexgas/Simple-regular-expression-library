@@ -2,17 +2,19 @@
 A simple library providing access to parsing strings using regular expressions. 
 Additionally, you can perform some operations with deterministic state machines and syntax trees, including building your own.
 ===========================================================
-The syntax for this regular expression language is:
+# Usage
+For use in the project, place the source code files from the "regex" folder into one folder (except for the "regex.cpp" file, there are only some test cases that are already implemented as unit tests) and in the right place where you want to use the library include the "Regular_expression.h" file. All functions provided by the library are contained in the "rgx" namespace. The "regex" namespace contains the classes and methods responsible for running the library core. Using them individually may not produce the results you expect.
+# The syntax for this regular expression language is:
 
- # Operation "or": r1 | r2 (metacharacter '|').
+ ## Operation "or": r1 | r2 (metacharacter '|').
 	 
- # Concatenation operation: r1r2
+ ## Concatenation operation: r1r2
 
- # Operation "positive closure": r + (metacharacter '+') - repeating the operand 1 or more times
+ ## Operation "positive closure": r + (metacharacter '+') - repeating the operand 1 or more times
 
- # Operation "optional part": r? (metacharacter '?')
+ ## Operation "optional part": r? (metacharacter '?')
 
- # "Any character" operation:. (metacharacter '.') - any ascii character. 
+ ## "Any character" operation:. (metacharacter '.') - any ascii character. 
    (branching on a specific symbol has a higher priority, branching on '.' is carried out only if
    there are no explicit branches on the current symbol). 
 
@@ -20,7 +22,7 @@ The syntax for this regular expression language is:
   	      metacharacter with a combination of others, then it is better to do this, in this case both the analysis
               of the string and the construction of the automaton will be faster.
 
- # Operation "repeat expression in range": r {x, y} (metacharacter {x, y}) - borders can be omitted. 
+ ## Operation "repeat expression in range": r {x, y} (metacharacter {x, y}) - borders can be omitted. 
    If the right boundary is omitted {, y} is interpreted as {0, y}, if the left {x,} is interpreted as {x, inf},
    both boundaries can be omitted (an analogue of the Kleene closure is obtained). The construct r {0,0} is allowed,
    but it is interpreted simply as an empty substring, without affecting the regular expression. 
@@ -31,7 +33,7 @@ The syntax for this regular expression language is:
    		values ​​of the range (usually more than 10, but depending on the situation), restoring the regular expression using the k-path method becomes
    		very memory-intensive, and sometimes even impossible.
 
- # Named capture group operation: (<name> r) (metacharacter (<name>)) -
+ ## Named capture group operation: (<name> r) (metacharacter (<name>)) -
    where name is the name of the capture group. Allows you to save the value that was obtained by parsing the corresponding
    section of the string in these brackets. The group name can only consist of letters, and after it there must be some expression,
    and not immediately the closing parenthesis. The name cannot be duplicated within the regular expression. 
@@ -45,7 +47,7 @@ The syntax for this regular expression language is:
    		expression, the operations (<name> r) +, (<name> r) ?, (<name> r) {x, y} are not prohibited, but in the group
    		capture will write the value that was obtained from the LAST entry of it into the string.
 
- # Operation "expression from a named capturing group": <name> (metacharacter <name>) - when parsing a string,
+ ## Operation "expression from a named capturing group": <name> (metacharacter <name>) - when parsing a string,
    it is replaced with the value that is stored in the capturing group with the corresponding name.At the stage
    of building a regular expression, it throws an exception if a capturing group with the same name is not in the regular expression,
    or it obviously comes after. When parsing a string, it throws an exception if there is a link to a capturing group that
@@ -66,24 +68,24 @@ The syntax for this regular expression language is:
    		but this will require "rebuilding" the automaton right during the parsing of the string, which will greatly affect
    		the performance of using this operation even in cases without ambiguity. (maybe a separate function will be added, more secure, but slower).
 
- # The "escaping" operation: & - converts the following metacharacter (a regular character too) into a regular alphabet character. It takes precedence over parentheses.
+ ## The "escaping" operation: & - converts the following metacharacter (a regular character too) into a regular alphabet character. It takes precedence over parentheses.
 
 !!!   Please note that if the syntax is violated in the following operations:
       (<name> r), <name>, r {x, y}, for example, if the name is not only letters, or an extra comma, or x is not a number,
        they will be interpreted as a set of ordinary characters.
 
- # The "empty string" metacharacter: `- allows you to explicitly separate metacharacters and subexpressions from each other,
+ ## The "empty string" metacharacter: `- allows you to explicitly separate metacharacters and subexpressions from each other,
    without affecting the result of string parsing in any way. 
 
 	NOTE:   not supported at this time, you can apply {0,0}
    		to any character in the alphabet as a replacement, for example "e {0,0}"
 
- # Operation "closure of Kleene": r * (metacharacter '*') - repetition of an expression any number
+ ## Operation "closure of Kleene": r * (metacharacter '*') - repetition of an expression any number
    from 0 to infinity times. 
 
 	NOTE: Not supported yet. As a replacement, you can use "r? +", "R +?", "R {0,}"
 
- # Operation "any of ...": [r1r2r3r4..rN] (metacharacter '[]') 
+ ## Operation "any of ...": [r1r2r3r4..rN] (metacharacter '[]') 
 	
 	NOTE: not yet supported, as a replacement you can use "r1 | r2 | r3 ... | rN"
 
@@ -94,17 +96,19 @@ The syntax for this regular expression language is:
               then this will be interpreted as a "named" capturing group to separate the "expression" from the parentheses, use the "empty line character".
 
 =============================
-	Exceptions:
+	
+# Exceptions:
 
- # If the syntax of a regular expression is violated, a "SintaxTree_Error" exception is thrown.
- # When parsing a string, the only exception that can be thrown by std :: logic_error is when trying to access an uninitialized capture group.
+ ## If the syntax of a regular expression is violated, a "SintaxTree_Error" exception is thrown.
+ ## When parsing a string, the only exception that can be thrown by std :: logic_error is when trying to access an uninitialized capture group.
 =============================
-	Most important objects:
+	
+# Most important objects:
 
- # an object of the "RgxResult" type stores the result of string analysis - an array of correct substrings
+ ## An object of the "RgxResult" type stores the result of string analysis - an array of correct substrings
    that have successfully passed the analysis and, optionally, an array of tables with the values ​​of capture groups.
 
- # an object of type "Regular_expression" is a regular expression. 
+ ## an object of type "Regular_expression" is a regular expression. 
   Constructed by string, if bool = true is passed to the constructor, an expression will be generated to invert the given string.
  	!!! This class also supports methods:
 	  # std :: string restore_expression () - Returns the string representation of the regular expression. Since it is not stored explicitly,
@@ -115,22 +119,22 @@ The syntax for this regular expression language is:
 	    to the point that recovery will be impossible and an exception will be thrown
 	    std :: bad_alloc (this will not leak memory, everything is safe).
 
-	  # Regular_expression make_language_inversion () - Returns a regular expression object that matches the inversion of the language.
+	  ## Regular_expression make_language_inversion () - Returns a regular expression object that matches the inversion of the language.
              !!! NOTE: internally it uses restore_expression (), so for large expressions there may be problems,
 	         for complex expressions use the Regular_expression string constructor with an additional parameter true
 		 (this will build the inversion without having to restore the original regular expression)
 
-	  # Regular_expression make_language_addition () noexcept - Returns a regular expression object that matches the language completion (safe).
+	  ## Regular_expression make_language_addition () noexcept - Returns a regular expression object that matches the language completion (safe).
 
 ~~~ The library also supports 2 functions for parsing strings and their overloading:
 
- # checkString - 
+ ## checkString - 
 	1 argument - the parsed string,
 	2 - argument - regular expression (either as a string or as an object),
 	3 - argument (optional) RgxResult - if given, then the original string will be saved to it, if it passed the check successful and so is the capture group table (if any)
   The function returns bool - the result of the check.
 
- # findAll - Finds all maximum non-overlapping occurrences of the original string - substrings that match the regex
+ ## findAll - Finds all maximum non-overlapping occurrences of the original string - substrings that match the regex
 	1 - argument - parsed string
 	2 - argument is a regular expression (either as a string or as an object)
 	3 - argument (optional) - if true - as a result, a table of capture groups will also be returned for each substring that passed the check.
@@ -138,9 +142,9 @@ The function returns an RgxResult object.
 ===================================
 	Also:
 
- # The library also supports the construction and printing of a syntax tree for a given string (class SintaxTree).
+ ## The library also supports the construction and printing of a syntax tree for a given string (class SintaxTree).
 
- # The class of a deterministic state machine, supports the same functions as the library,
+ ## The class of a deterministic state machine, supports the same functions as the library,
    but you should not use it directly, it may be unsafe, it is better to use its wrapper in the form of Regular_Expression.
 
    	!!! (Multiplying two automata in this library will give the difference of 2 languages.
