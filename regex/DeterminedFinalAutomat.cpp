@@ -3,10 +3,9 @@
 #include <stack>
 #include <ranges>
 namespace regex {
-	int containState(std::vector<std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>>& src, std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> find) {
+	int containState(std::vector<std::unordered_set<std::shared_ptr<AutomataState>>>& src, std::unordered_set<std::shared_ptr<AutomataState>>& find) {
 		size_t j = 0;
 		for (auto i = src.cbegin(); i != src.cend(); i++,j++) {
-
 			if(DeterminedFinalAutomat::statesEquals(*i,find))
 				break;
 		}
@@ -14,18 +13,18 @@ namespace regex {
 	}
 
 	DeterminedFinalAutomat::DeterminedFinalAutomat(std::unique_ptr<NondeterminedFinalAutomata> nfa, const std::unordered_set<std::string>& alphabet, bool minim): states_count_(0) {
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> start = epsilonClosure(nfa->getStartState());
-		start_ = mergeStates(start);
-		std::vector<std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>> stateGroups_toProcess;
+		std::unordered_set<std::shared_ptr<AutomataState>> start = std::move(epsilonClosure(nfa->getStartState()));
+		start_ = mergeStates(&start);
+		std::vector<std::unordered_set<std::shared_ptr<AutomataState>>> stateGroups_toProcess;
 		stateGroups_toProcess.push_back(start);
 		std::vector<std::list<std::pair<std::string, int>>> transitionTable;
 
 		for (size_t i = 0; i < stateGroups_toProcess.size(); i++) {
 			transitionTable.push_back({});
-			std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> current;
+			std::unordered_set<std::shared_ptr<AutomataState>> current;
 			for (auto j = alphabet.cbegin(); j != alphabet.cend(); j++) {
-				current = epsilonClosure(charClosure(stateGroups_toProcess[i], *j));
-				if (current != nullptr) {
+				current = std::move(epsilonClosure(std::move(charClosure(stateGroups_toProcess[i], *j))));
+				if (!current.empty()) {
 					int index;
 					if (index = containState(stateGroups_toProcess, current), index < 0) {
 						index = stateGroups_toProcess.size();
@@ -40,7 +39,7 @@ namespace regex {
 		allStates.push_back(start_);
 
 		for (size_t i = 1; i < stateGroups_toProcess.size(); i++)
-			allStates.push_back(mergeStates(stateGroups_toProcess[i]));
+			allStates.push_back(mergeStates(&stateGroups_toProcess[i]));
 
 		for (size_t i = 0; i < allStates.size(); i++) {
 			std::unique_ptr<Transition>delayed = nullptr;
@@ -58,16 +57,16 @@ namespace regex {
 			minimization(alphabet);
 	}
 
-	std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> DeterminedFinalAutomat::epsilonClosure(std::shared_ptr<AutomataState> root) {
+	std::unordered_set<std::shared_ptr<AutomataState>> DeterminedFinalAutomat::epsilonClosure(std::shared_ptr<AutomataState> root) {
 		std::stack<std::shared_ptr<AutomataState>> plan;
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> used = std::make_shared<std::unordered_set<std::shared_ptr<AutomataState>>>();
+		std::unordered_set<std::shared_ptr<AutomataState>> used;
 		if (root != nullptr) {
 			plan.push(root);
 			while (!plan.empty()) {
 				auto tmp = plan.top();
 				plan.pop();
-				if (!used->contains(tmp)) {
-					used->insert(tmp);
+				if (!used.contains(tmp)) {
+					used.insert(tmp);
 					auto transits = tmp->getAllTransitions();
 					for (auto i = transits->begin(); i != transits->end(); i++) {
 						if (!(**i).getCondition()) {
@@ -77,41 +76,41 @@ namespace regex {
 				}
 			}
 		}
-		return used->empty()?nullptr: used;
+		return std::move(used);
 	}
 
-	std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>  DeterminedFinalAutomat::epsilonClosure(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> rootSet) {
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> result = std::make_shared<std::unordered_set<std::shared_ptr<AutomataState>>>();
-		if (rootSet != nullptr) {
-			for (auto i = rootSet->begin(); i != rootSet->end(); i++) {
-				auto tmp = epsilonClosure(*i);
-				for (auto j = tmp->begin(); j != tmp->end(); j++)
-					result->insert(*j);
+	std::unordered_set<std::shared_ptr<AutomataState>>  DeterminedFinalAutomat::epsilonClosure(std::unordered_set<std::shared_ptr<AutomataState>>&& rootSet) {
+		std::unordered_set<std::shared_ptr<AutomataState>> result;
+		if (!rootSet.empty()) {
+			for (auto i = rootSet.begin(); i != rootSet.end(); i++) {
+				auto tmp = std::move(epsilonClosure(*i));
+				for (auto j = tmp.begin(); j != tmp.end(); j++)
+					result.insert(*j);
 			}
 		}
-		return result->empty() ? nullptr : result;
+		return std::move(result);
 	}
 
-	std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>  DeterminedFinalAutomat::charClosure(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> rootSet, const std::string condition) {
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> result = std::make_shared<std::unordered_set<std::shared_ptr<AutomataState>>>();
-		if (rootSet != nullptr) {
-			for (auto i = rootSet->begin(); i != rootSet->end(); i++) {
+	std::unordered_set<std::shared_ptr<AutomataState>>  DeterminedFinalAutomat::charClosure(std::unordered_set<std::shared_ptr<AutomataState>>& rootSet, const std::string condition) {
+		std::unordered_set<std::shared_ptr<AutomataState>> result;
+		if (!rootSet.empty()) {
+			for (auto i = rootSet.begin(); i != rootSet.end(); i++) {
 				auto tmp = (**i).getAllTransitions();
 				for (auto j = tmp->begin(); j != tmp->end(); j++) {
 					if ((*j)->getCondition() == condition || (*j)->getCondition() == "")
-						result->insert((*j)->getTargetState());
+						result.insert((*j)->getTargetState());
 				}
 			}
 		}
-		return result->empty() ? nullptr :result;
+		return std::move(result);
 	}
 
-	bool  DeterminedFinalAutomat::statesEquals(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> fst, std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> scd) {
+	bool  DeterminedFinalAutomat::statesEquals(const std::unordered_set<std::shared_ptr<AutomataState>>& fst, const std::unordered_set<std::shared_ptr<AutomataState>>& scd) {
 		
-		if (fst->size() != scd->size())
+		if (fst.size() != scd.size())
 			return false;
-		for (auto i = fst->cbegin(); i != fst->cend(); i++) {
-			if (!scd->contains(*i))
+		for (auto i = fst.cbegin(); i != fst.cend(); i++) {
+			if (!scd.contains(*i))
 				return false;
 		}
 		return true;

@@ -80,6 +80,8 @@ int main()
 	}
 	std::cout << "1";*/
 	bool rs = false;	
+	rgx::RgxResult rez;
+	rez = rgx::findAll("qafs.env.env1", ".+&.(<rr>.{1,6})", true);
 	auto rzz = new rgx::Regular_expression("(<a>b|(<c>e|d))");
 	rgx::RgxResult res;
 	rs = checkString("d", *rzz, res);

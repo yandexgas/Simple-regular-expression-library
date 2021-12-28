@@ -58,9 +58,9 @@ namespace regex {
 		std::vector<std::shared_ptr<AutomataState>> acceptStates_;
 		std::vector<std::shared_ptr<AutomataState>> nonacceptStates_;
 		std::vector<std::shared_ptr<AutomataState>> allStates;
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> epsilonClosure(std::shared_ptr<AutomataState>);
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> epsilonClosure(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>);
-		std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>> charClosure(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>, const std::string);
+		std::unordered_set<std::shared_ptr<AutomataState>> epsilonClosure(std::shared_ptr<AutomataState>);
+		std::unordered_set<std::shared_ptr<AutomataState>> epsilonClosure(std::unordered_set<std::shared_ptr<AutomataState>>&&);
+		std::unordered_set<std::shared_ptr<AutomataState>> charClosure(std::unordered_set<std::shared_ptr<AutomataState>>&, const std::string);
 		template<Itarable T>
 		std::shared_ptr<AutomataState>  mergeStates(T src) {
 			std::shared_ptr<AutomataState> result = std::make_shared<DfaState>();
@@ -81,7 +81,7 @@ namespace regex {
 		DeterminedFinalAutomat(DeterminedFinalAutomat& obj) :states_count_(obj.states_count_), start_(obj.start_),acceptStates_(obj.acceptStates_), allStates(obj.allStates) {}
 		DeterminedFinalAutomat() :states_count_(0), start_(nullptr) {}
 		bool checkString(std::string) const;
-		static bool statesEquals(std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>, std::shared_ptr<std::unordered_set<std::shared_ptr<AutomataState>>>);
+		static bool statesEquals(const std::unordered_set<std::shared_ptr<AutomataState>>&,const std::unordered_set<std::shared_ptr<AutomataState>>&);
 		std::string regexRecover() const;
 		std::vector<std::string> findAll(std::string, std::vector<std::unordered_map<std::string, std::string>>* groups= nullptr) const;
 
